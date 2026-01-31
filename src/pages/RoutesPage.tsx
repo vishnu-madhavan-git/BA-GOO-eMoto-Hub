@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { MapPin, Navigation, Trophy, User, Plus } from 'lucide-react';
+import { RouteDrawer, LatLng } from '@/components/maps';
 
 interface LeaderboardEntry {
   rank: number;
@@ -22,19 +23,26 @@ const mockLeaderboard: LeaderboardEntry[] = [
 ];
 
 export default function RoutesPage() {
-  const [origin, setOrigin] = useState('');
-  const [destination, setDestination] = useState('');
+  const [routeWaypoints, setRouteWaypoints] = useState<LatLng[]>([]);
+  const [routeDistance, setRouteDistance] = useState(0);
+  const [routeName, setRouteName] = useState('');
   const [showRouteResult, setShowRouteResult] = useState(false);
+
+  const handleRouteChange = useCallback((waypoints: LatLng[], distance: number) => {
+    setRouteWaypoints(waypoints);
+    setRouteDistance(distance);
+    setShowRouteResult(waypoints.length >= 2);
+  }, []);
 
   const handleCreateRoute = (e: React.FormEvent) => {
     e.preventDefault();
-    if (origin && destination) {
-      setShowRouteResult(true);
+    if (routeWaypoints.length >= 2 && routeName) {
+      // TODO: Save route to database
+      console.log('Creating route:', { name: routeName, waypoints: routeWaypoints, distance: routeDistance });
     }
   };
 
-  const mockDistance = Math.floor(Math.random() * 15 + 5); // 5-20 km
-  const mockPoints = mockDistance * 2;
+  const mockPoints = Math.round(routeDistance * 2);
 
   return (
     <div className="page-container">
@@ -53,58 +61,27 @@ export default function RoutesPage() {
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Create Route */}
             <div className="glass-card p-6">
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
                 <Navigation className="w-5 h-5 text-primary" />
                 Create a Route
               </h2>
 
-              {/* Map Placeholder */}
-              <div className="aspect-video bg-secondary rounded-xl mb-6 flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 opacity-20">
-                  <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-primary rounded-full" />
-                  <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-primary rounded-full" />
-                  <div className="absolute bottom-1/4 left-1/2 w-2 h-2 bg-primary rounded-full" />
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                    <path
-                      d="M 25 25 Q 40 30 50 50 T 75 75"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="0.5"
-                      className="text-white/20"
-                    />
-                  </svg>
-                </div>
-                <div className="text-center text-muted-foreground">
-                  <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">Map integration coming soon</p>
-                </div>
-              </div>
+              {/* Interactive Map */}
+              <RouteDrawer 
+                onRouteChange={handleRouteChange}
+                className="mb-6"
+              />
 
               <form onSubmit={handleCreateRoute} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Origin</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Route Name</label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-400" />
+                    <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary" />
                     <input
                       type="text"
-                      value={origin}
-                      onChange={(e) => setOrigin(e.target.value)}
-                      placeholder="Starting point"
-                      className="form-input pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-white mb-2">Destination</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-red-400" />
-                    <input
-                      type="text"
-                      value={destination}
-                      onChange={(e) => setDestination(e.target.value)}
-                      placeholder="End point"
+                      value={routeName}
+                      onChange={(e) => setRouteName(e.target.value)}
+                      placeholder="Give your route a name"
                       className="form-input pl-10"
                       required
                     />
@@ -115,8 +92,8 @@ export default function RoutesPage() {
                   <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-sm text-muted-foreground">Estimated Distance</p>
-                        <p className="text-2xl font-bold text-white">{mockDistance} km</p>
+                        <p className="text-sm text-muted-foreground">Total Distance</p>
+                        <p className="text-2xl font-bold text-foreground">{routeDistance} km</p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-muted-foreground">Points Earned</p>
@@ -126,9 +103,13 @@ export default function RoutesPage() {
                   </div>
                 )}
 
-                <button type="submit" className="btn-primary w-full">
+                <button 
+                  type="submit" 
+                  className="btn-primary w-full"
+                  disabled={routeWaypoints.length < 2 || !routeName}
+                >
                   <Plus className="w-4 h-4 mr-2" />
-                  {showRouteResult ? 'Submit Route' : 'Calculate Route'}
+                  {showRouteResult ? 'Save Route' : 'Draw Route on Map'}
                 </button>
               </form>
             </div>
