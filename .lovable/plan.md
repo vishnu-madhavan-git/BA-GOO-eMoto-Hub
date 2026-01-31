@@ -61,23 +61,23 @@ Transform the basic Routes page into a full-featured community-driven route plat
 
 ---
 
-## Phase 2: Google Maps Integration
+## Phase 2: Map Integration (Leaflet + OpenStreetMap)
 
-### 2.1 Map Component Setup
-- Install `@react-google-maps/api` package
-- Create reusable `MapView` component with dark theme styling
-- Configure API key as environment secret
+### 2.1 Map Component Setup ✅
+- Installed `react-leaflet` and `leaflet` packages
+- Created reusable `MapView` component with dark CARTO theme
+- No API key required - uses free OpenStreetMap tiles
 
-### 2.2 Route Drawing Tool
+### 2.2 Route Drawing Tool ✅
 - **Drawing Mode**: Click-to-add waypoints with polyline visualization
-- **Edit Mode**: Drag waypoints to adjust route
-- **Preview Mode**: Display saved routes with markers
-- Snap-to-road option using Directions API (optional)
-
-### 2.3 Geolocation Features
-- Current location detection
-- Search places with autocomplete
+- **Undo/Clear**: Remove last point or clear entire route
+- **Preview Mode**: Display saved routes with colored markers
 - Distance calculation using Haversine formula
+
+### 2.3 Features
+- Green marker for start, red for end, yellow for waypoints
+- Real-time distance and estimated time calculation
+- Dark themed map tiles matching site design
 
 ---
 
@@ -219,12 +219,13 @@ achievements      - Badge definitions
 user_achievements - Earned badges
 ```
 
-### Key Dependencies to Add
-- `@react-google-maps/api` - Google Maps React wrapper
-- `@types/google.maps` - TypeScript definitions
+### Key Dependencies Added
+- `react-leaflet` - React wrapper for Leaflet maps
+- `leaflet` - Open-source mapping library
+- `@types/leaflet` - TypeScript definitions
 
-### Environment Secrets Required
-- `GOOGLE_MAPS_API_KEY` - For Maps JavaScript API
+### No Environment Secrets Required
+- Using free OpenStreetMap/CARTO tiles (no API key needed)
 
 ---
 
